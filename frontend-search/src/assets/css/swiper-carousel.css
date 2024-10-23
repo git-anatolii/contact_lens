@@ -1,0 +1,107 @@
+/* React Swiper Carousel Custom css */
+.heightFull,
+.heightFull .carouselWrapper,
+.heightFull .carouselWrapper > .swiper,
+.heightFull .carouselWrapper > .swiper > .swiper-wrapper,
+.heightFull .carouselWrapper > .swiper > .swiper-wrapper .swiper-slide > div,
+.heightFull .carouselWrapper > .swiper > .swiper-wrapper .swiper-slide > a,
+.heightFull
+  .carouselWrapper
+  > .swiper
+  > .swiper-wrapper
+  .swiper-slide
+  > a
+  > .group,
+.heightFull a > div {
+  height: 100%;
+}
+.heightFull .swiper-slide{
+    width:auto;
+}
+.heightFull .carouselWrapper > .swiper > .swiper-wrapper .swiper-slide > a {
+  display: flex;
+}
+
+.swiper .swiper-button-prev,
+.swiper .swiper-button-next {
+display: none;
+}
+.carouselWrapper .swiper-button-disabled,
+#productGallery + div > .swiper-button-disabled {
+cursor: not-allowed;
+opacity: 0;
+visibility: hidden;
+}
+.carouselWrapper .swiper-button-disabled:hover,
+#productGallery + div > .swiper-button-disabled:hover {
+color: inherit;
+background-color: #666;
+}
+
+.carouselWrapper .swiper .swiper-pagination-bullets .swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+border: 0;
+background-color: #ccc;
+border-radius: 8px;
+transition: all 0.3s ease-in-out;
+}
+.carouselWrapper .swiper .swiper-pagination-bullets {
+bottom: 10px;
+}
+.carouselWrapper
+.swiper
+.swiper-pagination-bullets
+.swiper-pagination-bullet.swiper-pagination-bullet-active {
+width: 18px;
+opacity: 1;
+}
+.carouselWrapper.dotsCircleBlack
+.swiper
+.swiper-pagination-bullets
+.swiper-pagination-bullet {
+background-color: #000;
+}
+
+#productGalleryThumbs {
+  max-height: 580px;
+}
+#productGalleryThumbs .swiper-slide{
+    height: 100% !important;
+}
+#productGalleryThumbs .swiper-wrapper .swiper-slide.swiper-slide-thumb-active {
+  border-color: #80d8c7;
+}
+
+@media screen and (min-width: 1024px) {
+
+  .carouselWrapper.dotsCircleBlack .swiper .swiper-pagination-bullets {
+    bottom: 0;
+  }
+  .carouselWrapper
+    .swiper
+    .swiper-pagination-bullets
+    .swiper-pagination-bullet {
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    margin-right: 5px;
+    opacity: 1;
+  }
+  .carouselWrapper
+    .swiper
+    .swiper-pagination-bullets
+    .swiper-pagination-bullet.swiper-pagination-bullet-active {
+    width: 34px;
+    background:#ff7e00;
+  }
+}
+
+.swiper-multirow-column > .swiper-wrapper {
+  flex-direction: row;
+}
+
+.antique-carousel-slider .swiper {
+  padding-top: 10px;
+  padding-bottom: 40px;
+}
