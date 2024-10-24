@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import axios from 'axios';
 import { FcGoogle } from 'react-icons/fc';
 import { useAppDispatch, useAppSelector } from 'src/lib/hook';
-import { loginUser, loginWithGoogle } from 'src/lib/reducers/userSlice';
+import { loginUser, googleLoginUser } from 'src/lib/reducers/userSlice';
 import { RootState, AppDispatch } from 'src/lib/store';
 import Input from '@components/ui/form/input';
 import PasswordInput from '@components/ui/form/password-input';
@@ -19,6 +19,8 @@ import cn from 'classnames';
 import { ROUTES } from '@utils/routes';
 import AlertFailure from '@components/ui/alert/alert-failure';
 import AlertSuccess from '@components/ui/alert/alert-success';
+import { axiosApi } from 'src/lib/api/userApi';
+import { API_ENDPOINTS } from '@utils/api-endpoints';
 
 interface LoginFormProps {
   lang: string;
@@ -45,7 +47,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ lang }) => {
       email: email,
       password: password,
       remember_me: remember,
-      google_login: false,
     };
     await dispatch(loginUser(userLoginData)).unwrap();
     router.push(`/${lang}${ROUTES.HOME}`);
@@ -56,12 +57,35 @@ const LoginForm: React.FC<LoginFormProps> = ({ lang }) => {
   function handleForgetPassword() {
     return openModal('FORGET_PASSWORD');
   }
+  const handleGoogleLogin = async () => {
+    try {
+      const url = API_ENDPOINTS.GOOGLE_LOGIN;
+      const response = await axiosApi.get(url);
+      const authUrl = response.data.auth_url;
+
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Error during Google login:", error);
+    }
+  };
 
   useEffect(() => {
-    if (error) {
-      signOut();
-    }
-  }, [error]);
+    const handleGoogleLoginCallBack = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (code) {
+        try {
+          await dispatch(googleLoginUser(code)).unwrap();
+          router.push(`/${lang}${ROUTES.HOME}`);
+        } catch (error) {
+          console.error('Error during login:', error);
+        }
+      }
+    };
+
+    handleGoogleLoginCallBack();
+  }, []);
 
   return (
     <div
@@ -159,11 +183,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ lang }) => {
           </div>
 
           <div className="flex justify-center mt-5 space-x-2.5">
-            <GoogleLoginButton
-              router={router}
-              dispatch={dispatch}
-              lang={lang}
-            />
+            <button
+              onClick={handleGoogleLogin}
+              className="flex border border-border-base rounded-lg p-2"
+            >
+              <FcGoogle className="w-5 h-5 mr-1" />
+              Sign in with Google
+            </button>
           </div>
         </div>
       </div>
@@ -172,54 +198,3 @@ const LoginForm: React.FC<LoginFormProps> = ({ lang }) => {
 };
 
 export default LoginForm;
-
-type GoogleLoginButtonProps = {
-  dispatch: any;
-  router: any;
-  lang: string;
-};
-const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
-  dispatch,
-  router,
-  lang,
-}) => {
-  const { data: session } = useSession();
-
-  const handleGoogleLogin = async () => {
-    if (!session) {
-      await signIn('google');
-    }
-  };
-
-  useEffect(() => {
-    handleGoogleLoginApi();
-  }, [session]);
-
-  const handleGoogleLoginApi = async () => {
-    if (session?.user?.email) {
-      const userLoginData: LoginInputType = {
-        email: session.user.email,
-        password: '',
-        remember_me: false,
-        google_login: true,
-      };
-
-      await dispatch(loginUser(userLoginData)).unwrap();
-      router.push(`/${lang}${ROUTES.HOME}`);
-    }
-  };
-
-  
-
-  return (
-    <button
-      onClick={() => {
-        handleGoogleLogin();
-      }}
-      className="flex border border-border-base rounded-lg p-2"
-    >
-      <FcGoogle className="w-5 h-5 mr-1" />
-      Sign in with Google
-    </button>
-  );
-};

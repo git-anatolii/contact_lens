@@ -1,5 +1,7 @@
 export const API_ENDPOINTS = {
   LOGIN: 'users/login',
+  GOOGLE_LOGIN: '/users/login/google',
+  GOOGLE_LOGIN_CALLBACK: '/users/login/google/callback',
   TOKEN_LOGIN: 'users/login/token',
   REGISTER: 'users/register',
   LOGOUT: '/logout',

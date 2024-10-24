@@ -2,7 +2,6 @@
 
 import { useAppDispatch, useAppSelector } from 'src/lib/hook';
 import { logOutUser } from 'src/lib/reducers/userSlice';
-import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import LogoutIcon from '@components/icons/account-logout';
@@ -30,7 +29,7 @@ export default function AccountNav({
   const mainPath = `/${newPathname[0]}`;
   const logout = async () => {
     await dispatch(logOutUser());
-    await signOut();
+    router.push(`/${lang}${ROUTES.LOGIN}`)
   };
   return (
     <nav className="flex flex-col pb-2 overflow-hidden border rounded-md md:pb-6 border-border-base">

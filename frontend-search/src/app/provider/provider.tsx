@@ -4,7 +4,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import StoreProvider from './store-provider';
-import { SessionProvider } from 'next-auth/react';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -19,12 +18,10 @@ function Providers({ children, session }: ProvidersProps) {
 
   return (
     <StoreProvider>
-      <SessionProvider session={session}>
-        <QueryClientProvider client={queryClientRef.current}>
-          {children}
-          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-        </QueryClientProvider>
-      </SessionProvider>
+      <QueryClientProvider client={queryClientRef.current}>
+        {children}
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      </QueryClientProvider>
     </StoreProvider>
   );
 }

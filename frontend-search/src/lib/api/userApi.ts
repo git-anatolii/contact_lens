@@ -31,6 +31,17 @@ export const userLogin = async (userLoginData: LoginInputType) => {
   }
 };
 
+export const googleLogin = async (code: string) => {
+  const url = API_ENDPOINTS.GOOGLE_LOGIN_CALLBACK;
+
+  try {
+    const response = await axiosApi.get(url, { params: { code: code } });
+    return response.data;
+  } catch (err: any) {
+    throw err.response?.data.detail;
+  }
+}
+
 export const tokenLogin = async () => {
   const url = API_ENDPOINTS.TOKEN_LOGIN;
   try {

@@ -8,6 +8,7 @@ from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 from sqlmodel import col, delete, func, select
+import httpx
 
 from app import crud
 from app.api.deps import (
@@ -43,47 +44,61 @@ from app.utils import (
 
 router = APIRouter()
 
-# Configure OAuth client
-oauth = OAuth()
-oauth.register(
-    name='google',
-    client_id=settings.GOOGLE_CLIENT_ID,
-    client_secret=settings.GOOGLE_CLIENT_SECRET,
-    authorize_url="https://accounts.google.com/o/oauth2/auth",
-    access_token_url="https://oauth2.googleapis.com/token",
-    userinfo_endpoint="https://www.googleapis.com/oauth2/v3/userinfo",
-    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
-    client_kwargs={"scope": "openid profile email"},
-)
-
 @router.get("/login/google")
-async def login_google(request: Request):
-    redirect_uri = request.url_for("auth_google_callback")
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+async def login_google():
+    google_auth_url = (
+        f"https://accounts.google.com/o/oauth2/auth"
+        f"?response_type=code&client_id={settings.GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
+        f"&scope=openid profile email"
+        f"&access_type=offline&prompt=consent"
+    )
+    return {"auth_url": google_auth_url}
 
 @router.get("/login/google/callback")
-async def auth_google_callback(request: Request, session: SessionDep):
-    token = await oauth.google.authorize_access_token(request)
-    print(token)
-    user_info = token['userinfo']
-    
-    email = user_info["email"]
-    name = user_info["name"]
-    password = settings.GOOGLE_LOGIN_DEFAULT_PASSWORD
+async def google_callback(code: str, session: SessionDep):
+    try:
+        # Exchange code for access and ID token
+        token_url = "https://oauth2.googleapis.com/token"
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                token_url,
+                data={
+                    "client_id": settings.GOOGLE_CLIENT_ID,
+                    "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                    "code": code,
+                    "grant_type": "authorization_code",
+                    "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                },
+            )
+            token_data = response.json()
 
-    user_create = UserCreate(
-        email=email,
-        name=name,
-        password=password
-    )
-    
-    user: UserPublic = crud.get_or_create_user(session=session, user_create=user_create)
-    
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(user.id, expires_delta=access_token_expires)
+        # Use the access_token to get user information
+        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+        async with httpx.AsyncClient() as client:
+            user_info = await client.get(user_info_url, headers=headers)
 
-    return TokenWithUser(access_token=access_token, user=user)
+        email = user_info.json()["email"]
+        name = user_info.json()["name"]
+        password = settings.GOOGLE_LOGIN_DEFAULT_PASSWORD
 
+        user_create = UserCreate(
+            email=email,
+            name=name,
+            password=password
+        )
+        
+        user: UserPublic = crud.get_or_create_user(session=session, user_create=user_create)
+        
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = security.create_access_token(user.id, expires_delta=access_token_expires)
+
+        return TokenWithUser(access_token=access_token, user=user)
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error during Google login: {str(e)}")
+    
 @router.post("/register", response_model=UserPublic)
 def register_user(session: SessionDep, user_in: UserRegister):
     user = crud.get_user_by_email(session=session, email=user_in.email)

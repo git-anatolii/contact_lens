@@ -19,3 +19,6 @@ mysqlclient
 PyPDF2
 chromadb
 authlib
+itsdangerous
+bs4
+

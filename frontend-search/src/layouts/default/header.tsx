@@ -35,13 +35,10 @@ function Header({ lang }: { lang: string }) {
   useActiveScroll(siteHeaderRef);
   useEffect(() => {
     dispatch(tokenLoginUser());
-  }, [dispatch, user]);
+  }, []);
 
   function handleLogin() {
     router.push(`/${lang}${ROUTES.LOGIN}`);
-  }
-  function handleMobileMenu() {
-    return openSidebar();
   }
   function handleCategoryMenu() {
     setCategoryMenu(!categoryMenu);
@@ -69,18 +66,26 @@ function Header({ lang }: { lang: string }) {
           </div>
           <div className="border-b border-white/5">
             <Container>
-              <div className="flex items-center justify-between  py-2 md:py-4">
+              <div className="flex items-center justify-between">
                 <Logo lang={lang} className="ps-3 md:ps-0 lg:mx-0" />
 
-                <Search
-                  searchId="top-bar-search"
-                  lang={lang}
-                  className="hidden lg:flex lg:max-w-[450px] xl:max-w-[650px] 2xl:max-w-[900px] lg:mx-10"
-                />
+                <div className='flex flex-col gap-4 justify-center items-center px-4 pt-8'>
+                  <Search
+                    searchId="top-bar-search"
+                    lang={lang}
+                    className="flex w-[100vh] px-4"
+                  />
+                  <HeaderMenu
+                    data={site_header.menu}
+                    className="flex transition-all duration-200 ease-in-out"
+                    lang={lang}
+                  />
+                </div>
 
-                <div className="flex space-x-5 xl:space-x-10 lg:max-w-[33%]">
-                  <div className="items-center hidden lg:flex shrink-0">
-                    <div className="cart-button">
+
+                <div className="flex space-x-5 xl:space-x-10">
+                  <div className="items-center flex gap-4">
+                    <div className="flex items-center justify-center">
                       <UserIcon className="text-brand" />
                     </div>
 
@@ -88,7 +93,7 @@ function Header({ lang }: { lang: string }) {
                       isAuthorized={isAuthorized}
                       href={`/${lang}${ROUTES.ACCOUNT}`}
                       btnProps={{
-                        children: 'Sign In',
+                        children: 'SIGN IN',
                         onClick: handleLogin,
                       }}
                     >
@@ -97,11 +102,7 @@ function Header({ lang }: { lang: string }) {
                   </div>
                 </div>
               </div>
-              <HeaderMenu
-                  data={site_header.menu}
-                  className="flex transition-all duration-200 ease-in-out"
-                  lang={lang}
-                />
+
             </Container>
           </div>
         </div>

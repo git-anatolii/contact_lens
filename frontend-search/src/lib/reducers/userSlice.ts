@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { LoginInputType, SignUpInputType, User } from '@utils/types';
-import { userRegister, userLogin, tokenLogin } from '../api/userApi';
+import { userRegister, userLogin, googleLogin, tokenLogin } from '../api/userApi';
 
 export const registerUser = createAsyncThunk<
   User,
@@ -39,36 +39,30 @@ export const loginUser = createAsyncThunk<
   }
 );
 
-export const tokenLoginUser = createAsyncThunk<
-  User,
-  void,
-  { rejectValue: string }
->('auth/tokenLogin', async (_, { rejectWithValue }) => {
-  try {
-    const data = await tokenLogin();
-    return data;
-  } catch (err) {
-    return rejectWithValue(err as string);
-  }
-});
-
-export const loginWithGoogle = createAsyncThunk(
-  'auth/loginWithGoogle',
-  async (
-    { tokenId, profileObj }: { tokenId: string; profileObj: any },
-    { rejectWithValue }
-  ) => {
+export const googleLoginUser = createAsyncThunk<User, string, { rejectValue: string }>(
+  'auth/googleLoginUser',
+  async (code, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/auth/google', {
-        tokenId,
-        profileObj,
-      });
-      return response.data;
+      const data = await googleLogin(code);
+      localStorage.setItem('token', data.access_token);
+      return data?.user;
     } catch (err) {
-      return rejectWithValue('Failed to login with Google');
-    }
+      return rejectWithValue(err as string);
+    };
   }
+
 );
+
+export const tokenLoginUser = createAsyncThunk<User, void, { rejectValue: string }>(
+  'auth/tokenLogin',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await tokenLogin();
+      return data;
+    } catch (err) {
+      return rejectWithValue(err as string);
+    }
+  });
 
 interface InitialState {
   user: User;
@@ -104,7 +98,7 @@ export const userSlice = createSlice({
       state.error = '';
     },
     restoreError: (state) => {
-      state.error ='';
+      state.error = '';
     },
   },
   extraReducers: (builder) => {
@@ -139,6 +133,21 @@ export const userSlice = createSlice({
         state.loading = false;
         state.success = false;
         state.error = action.payload as string;
+      })
+      .addCase(googleLoginUser.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = '';
+      })
+      .addCase(googleLoginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.isAuthorized = true;
+        state.user = action.payload;
+      })
+      .addCase(googleLoginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
       })
       .addCase(tokenLoginUser.pending, (state) => {
         state.loading = true;

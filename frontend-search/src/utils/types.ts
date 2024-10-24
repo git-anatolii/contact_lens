@@ -2,7 +2,6 @@ export interface LoginInputType {
   email: string;
   password: string;
   remember_me: boolean;
-  google_login: boolean;
 }
 
 export interface SignUpInputType {
