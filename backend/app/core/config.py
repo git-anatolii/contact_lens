@@ -51,21 +51,13 @@ class Settings(BaseSettings):
     SENTRY_DSN: HttpUrl | None = None
     MYSQL_SERVER: str
     MYSQL_PORT: int = 3306
-    MYSQL_USER: str
-    MYSQL_PASSWORD: str = ""
-    MYSQL_DB: str = ""
+    MYSQL_USER: str 
+    MYSQL_PASSWORD: str 
+    MYSQL_DB: str 
 
-    @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
-        return MultiHostUrl.build(
-            scheme="mysql",
-            username=self.MYSQL_USER,
-            password=self.MYSQL_PASSWORD,
-            host=self.MYSQL_SERVER,
-            port=self.MYSQL_PORT,
-            path=self.MYSQL_DB,
-        )
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        return f"mysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_SERVER}:{self.MYSQL_PORT}/{self.MYSQL_DB}"
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False

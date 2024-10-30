@@ -32,8 +32,11 @@ app = FastAPI(
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS
+        # allow_origins=[
+        #     str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS
+        # ],
+         allow_origins=[
+            "*"
         ],
         allow_credentials=True,
         allow_methods=["*"],
@@ -41,7 +44,7 @@ if settings.BACKEND_CORS_ORIGINS:
     )
     app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
-@app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 async def health_check():
     return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "healthy"})
 

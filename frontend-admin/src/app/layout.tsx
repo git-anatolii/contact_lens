@@ -18,9 +18,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/assets/images/logo.png" type="image/png" />
-      </head>
       <body className={inter.className}>
         <NotificationProvider>
           {children}

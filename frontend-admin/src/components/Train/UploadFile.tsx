@@ -20,7 +20,6 @@ const props: UploadProps = {
         } else if (file.status === 'error') {
             message.error(`${file.name} file upload failed.`);
         }
-        console.log(file, fileList);
     },
     progress: {
         strokeColor: {

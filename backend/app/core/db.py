@@ -8,7 +8,6 @@ from sqlmodel import SQLModel
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 def init_sql_db(session: Session) -> None:
-    
     SQLModel.metadata.create_all(engine)
 
     # Add first user
